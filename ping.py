@@ -27,7 +27,7 @@ def tryping(instance, url):
   ret = instance.ping(url)
   return ret.is_reached()
 
-p = ping.Ping()
+p = ping.Ping(keep=True)
 interval = 3
 logname = datetime.datetime.now().strftime("%Y-%m-%d.log")
 log = open(logname, 'a')

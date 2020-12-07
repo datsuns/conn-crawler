@@ -17,13 +17,15 @@ else:
 
 class Ping():
 
-    def __init__(self, timeout=1000, packet_size=55, own_id=None, udp=False, bind=None, quiet=True):
+    def __init__(self, timeout=1000, packet_size=55, own_id=None, udp=False, bind=None, quiet=True, keep=False):
         self.timeout = timeout
         self.packet_size = packet_size
         self.own_id = own_id
         self.udp = udp
         self.bind = bind
         self.quiet = quiet
+        self.keep = keep
+        self.sock = None
 
         if own_id is None:
             self.own_id = os.getpid() & 0xFFFF
@@ -186,7 +188,8 @@ class Ping():
         for i in range(0, times):
             # create socket to send it
             try:
-                my_socket = self.make_socket()
+                if self.sock == None:
+                    self.sock = self.make_socket()
             except socket.error as e:
                 etype, evalue, etb = sys.exc_info()
                 if e.errno == 1:
@@ -200,20 +203,22 @@ class Ping():
                 return response
 
             try:
-                send_time = self.send(my_socket, dest_ip)
+                send_time = self.send(self.sock, dest_ip)
             except socket.error as e:
                 msg = "General failure ({})".format(e.args[1])
                 self._echo_message(msg)
                 response.messages.append(msg)
-                my_socket.close()
+                if self.keep == False:
+                    self.sock.close()
                 return response
 
             if not send_time:
                 response.ret_code = Ping.FAILED
                 return response
 
-            receive_time, packet_size, ip, ip_header, icmp_header = self.receive(my_socket)
-            my_socket.close()
+            receive_time, packet_size, ip, ip_header, icmp_header = self.receive(self.sock)
+            if self.keep == False:
+                self.sock.close()
             delay = self._calc_delay(send_time, receive_time)
 
             # if receive_time value is 0, it means packet could not received
