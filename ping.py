@@ -4,7 +4,7 @@ import pings
 import datetime
 import time
 
-import lib.ping
+import lib.ping as ping
 
 class bcolors:
   HEADER = '\033[95m'
@@ -23,17 +23,16 @@ def okstring(s):
 def ngstring(s):
   return f"{bcolors.FAIL}{bcolors.UNDERLINE}" + s + f"{bcolors.ENDC}"
 
-def tryping(url):
-  #p = pings.Ping(quiet=False)
-  p = pings.Ping()
-  ret = p.ping(url)
+def tryping(instance, url):
+  ret = instance.ping(url)
   return ret.is_reached()
 
+p = ping.Ping()
 interval = 3
 logname = datetime.datetime.now().strftime("%Y-%m-%d.log")
 log = open(logname, 'a')
 while True:
-  succeeded = tryping('google.com')
+  succeeded = tryping(p, 'google.com')
   if succeeded:
     log.write(f"OK: {datetime.datetime.now()}\n")
     print(f"{okstring('OK')}: {datetime.datetime.now()}")
