@@ -24,19 +24,19 @@ def ngstring(s):
 
 def tryping(instance, url):
   ret = instance.ping(url)
-  return ret.is_reached()
+  return [ret.is_reached(), ret.messages]
 
 p = ping.Ping(keep=True)
 interval = 3
 logname = datetime.datetime.now().strftime("%Y-%m-%d.log")
 log = open(logname, 'a')
 while True:
-  succeeded = tryping(p, 'google.com')
+  [succeeded, msg] = tryping(p, 'google.com')
   if succeeded:
     log.write(f"OK: {datetime.datetime.now()}\n")
     print(f"{okstring('OK')}: {datetime.datetime.now()}")
   else:
-    log.write(f"NG: {datetime.datetime.now()}\n")
-    print(f"{ngstring('NG')}: {datetime.datetime.now()}")
+    log.write(f"NG: {datetime.datetime.now()} [{msg}]\n")
+    print(f"{ngstring('NG')}: {datetime.datetime.now()} [{msg}]")
   log.flush()
   time.sleep(interval)

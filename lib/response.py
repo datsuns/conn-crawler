@@ -41,3 +41,6 @@ class Response():
     def print_messages(self):
         for msg in self.messages:
             print(msg)
+
+    def messages(self):
+        return self.self.messages
